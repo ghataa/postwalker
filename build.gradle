@@ -36,4 +36,7 @@ ext {
     runner_version = '1.2.0'
     espresso_version = '3.2.0'
     dagger_version = '2.16'
+    rxjava_version = '2.2.11'
+    rxandroid_version = '2.1.1'
+    room_version = '2.2.0-alpha02'
 }

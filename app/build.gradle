@@ -11,9 +11,42 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
-            minifyEnabled false
+        debug {
+            minifyEnabled true
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled true
+            useProguard true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    def flavorDimensionEnvironment = "environment"
+
+    flavorDimensions flavorDimensionEnvironment
+
+    productFlavors {
+        mock {
+            dimension flavorDimensionEnvironment
+            applicationIdSuffix = ".mock"
+        }
+        prod {
+            dimension flavorDimensionEnvironment
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    android.variantFilter { variant ->
+        if (variant.buildType.name == 'release'
+                && variant.getFlavors().get(0).name == 'mock') {
+            variant.setIgnore(true)
         }
     }
 }
@@ -24,10 +57,14 @@ dependencies {
     testImplementation "junit:junit:$rootProject.junit_version"
     androidTestImplementation "androidx.test:runner:$rootProject.runner_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espresso_version"
-
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.dagger_version"
     implementation "com.google.dagger:dagger:$rootProject.dagger_version"
     implementation "com.google.dagger:dagger-android:$rootProject.dagger_version"
     implementation "com.google.dagger:dagger-android-support:$rootProject.dagger_version"
     annotationProcessor "com.google.dagger:dagger-android-processor:$rootProject.dagger_version"
+    implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjava_version"
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroid_version"
+    implementation "androidx.room:room-runtime:$rootProject.room_version"
+    implementation "androidx.room:room-rxjava2:$rootProject.room_version"
+    annotationProcessor "androidx.room:room-compiler:$rootProject.room_version"
 }
