@@ -10,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 @Singleton
@@ -30,6 +31,14 @@ public class LocalPostsDataSource implements PostsDataSource {
     @Override
     public Single<Post> getPost(@NonNull String postId) {
         return postsDao.getPostById(postId);
+    }
+
+    @Override
+    public Completable savePost(@NonNull Post post) {
+        return Completable.create(emitter -> {
+            postsDao.insertPost(post);
+            emitter.onComplete();
+        });
     }
 
     @Override

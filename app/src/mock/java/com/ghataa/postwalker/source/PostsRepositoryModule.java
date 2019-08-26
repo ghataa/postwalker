@@ -4,8 +4,10 @@ import android.app.Application;
 
 import androidx.room.Room;
 
+import com.ghataa.postwalker.MockRemotePostsDataSource;
 import com.ghataa.postwalker.data.source.Local;
 import com.ghataa.postwalker.data.source.PostsDataSource;
+import com.ghataa.postwalker.data.source.Remote;
 import com.ghataa.postwalker.data.source.local.LocalPostsDataSource;
 import com.ghataa.postwalker.data.source.local.PostDatabase;
 import com.ghataa.postwalker.data.source.local.PostsDao;
@@ -22,7 +24,12 @@ public abstract class PostsRepositoryModule {
     @Singleton
     @Binds
     @Local
-    abstract PostsDataSource providePostsLocalDataSource(LocalPostsDataSource dataSource);
+    abstract PostsDataSource provideLocalPostsDataSource(LocalPostsDataSource dataSource);
+
+    @Singleton
+    @Binds
+    @Remote
+    abstract PostsDataSource provideRemotePostsDataSource(MockRemotePostsDataSource dataSource);
 
     @Singleton
     @Provides
