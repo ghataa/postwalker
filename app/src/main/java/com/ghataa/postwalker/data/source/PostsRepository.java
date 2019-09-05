@@ -15,12 +15,16 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
 
 @Singleton
 public class PostsRepository implements PostsDataSource {
 
     private final PostsDataSource localPostsDataSource;
+    private final PostsDataSource remotePostsDataSource;
 
     /**
      * We cache posts in memory for solving UI faster
@@ -30,8 +34,10 @@ public class PostsRepository implements PostsDataSource {
     boolean memoryCacheIsDirty = false;
 
     @Inject
-    public PostsRepository(@Local PostsDataSource localPostsDataSource) {
+    public PostsRepository(@Local PostsDataSource localPostsDataSource,
+                           @Remote PostsDataSource remotePostsDataSource) {
         this.localPostsDataSource = localPostsDataSource;
+        this.remotePostsDataSource = remotePostsDataSource;
     }
 
     @SuppressLint("CheckResult")
@@ -42,16 +48,29 @@ public class PostsRepository implements PostsDataSource {
         }
 
         if (memoryCacheIsDirty) {
-            return localPostsDataSource.getPosts(); // TODO fetch from remote source
+            return getPostsFromRemoteSource();
         } else {
             return Single.create(emitter -> localPostsDataSource.getPosts()
+                    .flatMap((Function<List<Post>, SingleSource<List<Post>>>) posts -> {
+                        if (posts.size() == 0) {
+                            return getPostsFromRemoteSource();
+                        }
+
+                        return Single.just(posts);
+                    })
                     .subscribe(posts -> {
                         refreshMemoryCache(posts);
                         emitter.onSuccess(posts);
-                    }, throwable -> {
-                        emitter.onError(throwable); // TODO fetch from remote source
-                    }));
+                    }, throwable -> getPostsFromRemoteSource()));
         }
+    }
+
+    private Single<List<Post>> getPostsFromRemoteSource() {
+        return Single.create(emitter -> remotePostsDataSource.getPosts()
+                .subscribe(posts -> {
+                    refreshMemoryCache(posts);
+                    emitter.onSuccess(posts);
+                }, emitter::onError));
     }
 
     @SuppressLint("CheckResult")
@@ -72,9 +91,36 @@ public class PostsRepository implements PostsDataSource {
                     cachedPosts.put(post.getId(), post);
 
                     emitter.onSuccess(post);
-                }, throwable -> {
-                    emitter.onError(throwable); // TODO fetch from remote source
-                }));
+                }, throwable -> getPostFromRemoteSource(postId)));
+    }
+
+    @Override
+    public Completable savePost(@NonNull Post post) {
+        return Completable.create(emitter -> {
+            remotePostsDataSource.savePost(post).subscribe();
+            localPostsDataSource.savePost(post).subscribe();
+
+            if (cachedPosts == null) {
+                cachedPosts = new LinkedHashMap<>();
+            }
+
+            cachedPosts.put(post.getId(), post);
+
+            emitter.onComplete();
+        });
+    }
+
+    private Single<Post> getPostFromRemoteSource(@NonNull String postId) {
+        return Single.create(emitter -> remotePostsDataSource.getPost(postId)
+                .subscribe(post -> {
+                    if (cachedPosts == null) {
+                        cachedPosts = new LinkedHashMap<>();
+                    }
+
+                    cachedPosts.put(post.getId(), post);
+
+                    emitter.onSuccess(post);
+                }, emitter::onError));
     }
 
     @Override

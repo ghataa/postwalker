@@ -6,6 +6,7 @@ import com.ghataa.postwalker.data.Post;
 
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public interface PostsDataSource {
@@ -13,6 +14,8 @@ public interface PostsDataSource {
     Single<List<Post>> getPosts();
 
     Single<Post> getPost(@NonNull String postId);
+
+    Completable savePost(@NonNull Post post);
 
     void refreshPosts();
 
