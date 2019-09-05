@@ -7,6 +7,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,18 +18,22 @@ public final class Post {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "id")
+    @SerializedName("id")
     private final String id;
 
     @NonNull
     @ColumnInfo(name = "user_id")
+    @SerializedName("userId")
     private final String userId;
 
     @NonNull
     @ColumnInfo(name = "title")
+    @SerializedName("title")
     private final String title;
 
     @Nullable
     @ColumnInfo(name = "body")
+    @SerializedName("body")
     private final String body;
 
     @Ignore
