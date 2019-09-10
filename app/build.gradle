@@ -71,4 +71,7 @@ dependencies {
     implementation "com.jakewharton:butterknife:$rootProject.butterknife_version"
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknife_version"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.contraint_layout_version"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofit_version"
 }

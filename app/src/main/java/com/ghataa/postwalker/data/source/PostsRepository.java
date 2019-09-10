@@ -58,10 +58,11 @@ public class PostsRepository implements PostsDataSource {
 
                         return Single.just(posts);
                     })
+                    .onErrorResumeNext(getPostsFromRemoteSource())
                     .subscribe(posts -> {
                         refreshMemoryCache(posts);
                         emitter.onSuccess(posts);
-                    }, throwable -> getPostsFromRemoteSource()));
+                    }, emitter::onError));
         }
     }
 
@@ -83,6 +84,14 @@ public class PostsRepository implements PostsDataSource {
         }
 
         return Single.create(emitter -> localPostsDataSource.getPost(postId)
+                .flatMap((Function<Post, SingleSource<Post>>) post -> {
+                    if (post == null) {
+                        return getPostFromRemoteSource(postId);
+                    }
+
+                    return Single.just(post);
+                })
+                .onErrorResumeNext(getPostFromRemoteSource(postId))
                 .subscribe(post -> {
                     if (cachedPosts == null) {
                         cachedPosts = new LinkedHashMap<>();
@@ -91,7 +100,7 @@ public class PostsRepository implements PostsDataSource {
                     cachedPosts.put(post.getId(), post);
 
                     emitter.onSuccess(post);
-                }, throwable -> getPostFromRemoteSource(postId)));
+                }, emitter::onError));
     }
 
     @Override
