@@ -70,6 +70,7 @@ public class PostsRepository implements PostsDataSource {
         return Single.create(emitter -> remotePostsDataSource.getPosts()
                 .subscribe(posts -> {
                     refreshMemoryCache(posts);
+                    refreshLocalDatabase(posts);
                     emitter.onSuccess(posts);
                 }, emitter::onError));
     }
@@ -167,6 +168,12 @@ public class PostsRepository implements PostsDataSource {
         }
 
         memoryCacheIsDirty = false;
+    }
+
+    private void refreshLocalDatabase(List<Post> posts) {
+        for (Post post : posts) {
+            localPostsDataSource.savePost(post).subscribe();
+        }
     }
 
     @Nullable
