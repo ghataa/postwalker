@@ -23,10 +23,6 @@ public interface PostsContract {
 
     interface Presenter extends BasePresenter<View> {
 
-        void result(int requestCode, int resultCode);
-
         void loadPosts(boolean forceUpdate);
-
-        void clearPosts();
     }
 }

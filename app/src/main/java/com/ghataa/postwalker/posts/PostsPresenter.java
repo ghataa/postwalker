@@ -30,11 +30,6 @@ public class PostsPresenter implements PostsContract.Presenter {
     }
 
     @Override
-    public void result(int requestCode, int resultCode) {
-        // TODO
-    }
-
-    @Override
     public void loadPosts(boolean forceUpdate) {
         if (forceUpdate) {
             postsRepository.refreshPosts();
@@ -68,11 +63,6 @@ public class PostsPresenter implements PostsContract.Presenter {
         } else if (postsView != null) {
             postsView.showPosts(posts);
         }
-    }
-
-    @Override
-    public void clearPosts() {
-        // TODO
     }
 
     @Override
