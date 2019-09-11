@@ -1,12 +1,14 @@
 package com.ghataa.postwalker.posts;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +17,7 @@ import com.ghataa.postwalker.BasePresenter;
 import com.ghataa.postwalker.R;
 import com.ghataa.postwalker.data.Post;
 import com.ghataa.postwalker.di.ActivityScoped;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
@@ -28,6 +31,12 @@ public class PostsFragment extends BaseFragment implements PostsContract.View {
     @Inject
     PostsContract.Presenter presenter;
 
+    @BindView(R.id.screen_container)
+    ConstraintLayout screenContainerView;
+    @BindView(R.id.progressbar)
+    ProgressBar progressBar;
+    @BindView(R.id.no_posts_textview)
+    TextView noPostsTextView;
     @BindView(R.id.posts_recycler_view)
     RecyclerView postsRecyclerView;
 
@@ -62,22 +71,24 @@ public class PostsFragment extends BaseFragment implements PostsContract.View {
 
     @Override
     public void setLoadingIndicator(boolean active) {
-        // TODO
+        progressBar.setVisibility(active ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void showPosts(List<Post> posts) {
+        noPostsTextView.setVisibility(View.GONE);
         postsRecyclerView.setAdapter(new PostsAdapter(posts));
     }
 
     @Override
     public void showLoadingPostsError() {
-        // TODO
+        noPostsTextView.setVisibility(View.VISIBLE);
+        Snackbar.make(screenContainerView, R.string.posts_loading_posts_error, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
     public void showNoPosts() {
-        // TODO
+        noPostsTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
